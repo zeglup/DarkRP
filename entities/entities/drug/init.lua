@@ -73,16 +73,22 @@ function ENT:OnTakeDamage(dmg)
     end
 end
 
-function ENT:Use(activator,caller)
+function ENT:Use(activator, caller)
     if not self.CanUse then return end
     local Owner = self:Getowning_ent()
     if not IsValid(Owner) then return end
 
+    local canUse, reason = hook.Call("canDarkRPUse", nil, activator, self, caller)
+    if canUse == false then
+      if reason then DarkRP.notify(activator, 1, 4, reason) end
+      return
+    end
+
     if activator ~= Owner then
         if not activator:canAfford(self:Getprice()) then return end
         DarkRP.payPlayer(activator, Owner, self:Getprice())
-        DarkRP.notify(activator, 0, 4, DarkRP.getPhrase("you_bought", string.lower(DarkRP.getPhrase("drugs")), DarkRP.formatMoney(self:Getprice()), ""))
-        DarkRP.notify(Owner, 0, 4, DarkRP.getPhrase("you_received_x", DarkRP.formatMoney(self:Getprice()), string.lower(DarkRP.getPhrase("drugs"))))
+        DarkRP.notify(activator, 0, 4, DarkRP.getPhrase("you_bought", DarkRP.getPhrase("drugs"), DarkRP.formatMoney(self:Getprice()), ""))
+        DarkRP.notify(Owner, 0, 4, DarkRP.getPhrase("you_received_x", DarkRP.formatMoney(self:Getprice()), DarkRP.getPhrase("drugs")))
     end
     DrugPlayer(caller)
     self.CanUse = false

@@ -32,8 +32,8 @@ FPP.Settings.FPP_GRAVGUN1 = {
 FPP.Settings.FPP_TOOLGUN1 = {
 	toggle = 1,
 	adminall = 1,
-	worldprops = 1,
-	adminworldprops = 1,
+	worldprops = 0,
+	adminworldprops = 0,
 	canblocked = 0,
 	admincanblocked = 0,
 	shownocross = 1,
@@ -122,7 +122,7 @@ function FPP.calculatePlayerPrivilege(priv, callback)
 	local plys = player.GetAll()
 	local count = #plys
 
-	for _, ply in pairs(plys) do
+	for _, ply in ipairs(plys) do
 		local function onRes(b)
 			count = count - 1
 			ply.FPP_Privileges = ply.FPPPrivileges or {}

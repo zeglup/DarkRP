@@ -45,14 +45,14 @@ hook.Add("DatabaseInitialized", "InitializeFAdminGroups", function()
             end
 
             -- Send groups to early joiners and listen server hosts
-            for k,v in pairs(player.GetAll()) do
+            for _, v in ipairs(player.GetAll()) do
                 FAdmin.Access.SendGroups(v)
             end
 
             -- See if there are any CAMI usergroups that FAdmin doesn't know about yet.
             -- FAdmin doesn't start listening immediately because the database might not have initialised.
             -- Besides, other admin mods might add usergroups before FAdmin's Lua files are even run
-            for k,v in pairs(CAMI.GetUsergroups()) do
+            for _, v in pairs(CAMI.GetUsergroups()) do
                 if FAdmin.Access.Groups[v.Name] then continue end
 
                 FAdmin.Access.OnUsergroupRegistered(v)
@@ -132,7 +132,7 @@ function FAdmin.Access.RegisterCAMIPrivileges()
     MySQLite.query([[SELECT privname FROM FAdmin_CAMIPrivileges]], function(data)
         FAdmin.CAMIPrivs = {}
 
-        for _, row in pairs(data or {}) do
+        for _, row in ipairs(data or {}) do
             FAdmin.CAMIPrivs[row.privname] = true
         end
 
@@ -343,7 +343,7 @@ function FAdmin.Access.SetAccess(ply, cmd, args)
         return false
     end
 
-    if not targets and (string.find(args[1], "STEAM_") or args[1] == "BOT") then
+    if not targets and (string.find(args[1], "^STEAM_[0-9]:[01]:[0-9]+$") or args[1] == "BOT" or (string.find(args[1], "STEAM_") and #args == 6)) then
         local target, groupname = args[1], args[2]
         -- The console splits arguments on colons. Very annoying.
         if args[1] == "STEAM_0" then

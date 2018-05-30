@@ -103,6 +103,8 @@ end
 
 function FPP.AntiSpam.DuplicatorSpam(ply)
     if not tobool(FPP.Settings.FPP_ANTISPAM1.toggle) then return true end
+    if FPP.Settings.FPP_ANTISPAM1.duplicatorlimit == 0 then return true end
+
     ply.FPPAntiSpamLastDuplicate = ply.FPPAntiSpamLastDuplicate or 0
     ply.FPPAntiSpamLastDuplicate = ply.FPPAntiSpamLastDuplicate + 1
 
@@ -145,7 +147,7 @@ local function e2AntiMinge()
         -- it would make it possible to get around this with constrained ents
         local ConstrainedEnts = constraint.GetAllConstrainedEntities(ent)
         if ConstrainedEnts then -- Includes original entity
-            for k,v in pairs(ConstrainedEnts) do
+            for _, v in pairs(ConstrainedEnts) do
                 v:SetCollisionGroup(COLLISION_GROUP_WEAPON)
             end
         end
@@ -173,7 +175,7 @@ end)
 --More crash preventing:
 local function antiragdollcrash(ply)
     local pos = ply:GetEyeTraceNoCursor().HitPos
-    for k,v in pairs(ents.FindInSphere(pos, 30)) do
+    for _,v in ipairs(ents.FindInSphere(pos, 30)) do
         if v:GetClass() == "func_door" then
             FPP.Notify(ply, "Can't spawn a ragdoll near doors", false)
             return false

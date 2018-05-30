@@ -43,6 +43,9 @@ local my_language = {
     npc_killpay = "%s for killing an NPC!",
     profit = "profit",
     loss = "loss",
+    Donate = "Donate",
+    you_donated = "You have donated %s to %s!",
+    has_donated = "%s has donated %s!",
 
     -- backwards compatibility
     deducted_x = "Deducted %s%d",
@@ -65,8 +68,8 @@ local my_language = {
     cheque_pay = "Pay: %s",
     signed = "Signed: %s",
 
-    found_cash = "You have found %s%d!", -- backwards compatibility
-    found_money = "You have found %s!",
+    found_cash = "You have picked up %s%d!", -- backwards compatibility
+    found_money = "You have picked up %s!",
 
     owner_poor = "The %s owner is too poor to subsidize this sale!",
 
@@ -173,13 +176,17 @@ local my_language = {
     sold_x_doors = "You have sold %d doors for %s!",
 
     -- Entities
-    drugs = "Drugs",
+    drugs = "drugs",
+    Drugs = "Drugs",
     drug_lab = "Drug Lab",
     gun_lab = "Gun Lab",
+    any_lab = "any lab",
     gun = "gun",
     microwave = "Microwave",
-    food = "Food",
+    food = "food",
+    Food = "Food",
     money_printer = "Money Printer",
+    tip_jar = "Tip Jar",
 
     sign_this_letter = "Sign this letter",
     signed_yours = "Yours,",
@@ -224,9 +231,11 @@ local my_language = {
     no_weapons_confiscated = "%s had no weapons confiscated!",
     no_illegal_weapons = "%s had no illegal weapons.",
     confiscated_these_weapons = "Confiscated these weapons:",
-    checking_weapons = "Checking weapons",
+    checking_weapons = "Confiscating weapons",
 
     shipment_antispam_wait = "Please wait before spawning another shipment.",
+    createshipment = "Create a shipment",
+    splitshipment = "Split this shipment",
     shipment_cannot_split = "Cannot split this shipment.",
 
     -- Talking
@@ -270,13 +279,15 @@ local my_language = {
     cleaned_up = "Your %s were cleaned up.",
     you_bought_x = "You have bought %s for %s%d.", -- backwards compatibility
     you_bought = "You have bought %s for %s.",
+    you_got_yourself = "You got yourself a %s.",
     you_received_x = "You have received %s for %s.",
 
     created_first_jailpos = "You have created the first jail position!",
     added_jailpos = "You have added one extra jail position!",
     reset_add_jailpos = "You have removed all jail positions and you have added a new one here.",
-    created_spawnpos = "%s's spawn position created.",
-    updated_spawnpos = "%s's spawn position updated.",
+    created_spawnpos = "You have added a spawn position for %s.",
+    updated_spawnpos = "You have removed all spawn positions for %s and added a new one here.",
+    remove_spawnpos = "You have removed all spawn positions for %s.",
     do_not_own_ent = "You do not own this entity!",
     cannot_drop_weapon = "Can't drop this weapon!",
     job_switch = "Jobs switched successfully!",
@@ -327,7 +338,7 @@ local my_language = {
     gunlicense_removed = "%s's license has been removed!",
     gunlicense_not_removed = "%s's license has not been removed!",
     vote_specify_reason = "You need to specify a reason!",
-    vote_started = "The vote is created",
+    vote_started = "The vote has been created",
     vote_alone = "You have won the vote since you are alone in the server.",
     you_cannot_vote = "You cannot vote!",
     x_cancelled_vote = "%s cancelled the last vote.",
@@ -392,25 +403,27 @@ local my_language = {
     -- Animations
     custom_animation = "Custom animation!",
     bow = "Bow",
-    dance = "Dance",
+    sexy_dance = "Sexy dance",
     follow_me = "Follow me!",
     laugh = "Laugh",
     lion_pose = "Lion pose",
     nonverbal_no = "Non-verbal no",
     thumbs_up = "Thumbs up",
     wave = "Wave",
+    dance = "Dance",
 
     -- Hungermod
     starving = "Starving!",
 
     -- AFK
     afk_mode = "AFK Mode",
+    unable_afk_spam_prevention = "Please wait before going AFK again.",
     salary_frozen = "Your salary has been frozen.",
     salary_restored = "Welcome back, your salary has now been restored.",
     no_auto_demote = "You will not be auto-demoted.",
     youre_afk_demoted = "You were demoted for being AFK for too long. Next time use /afk.",
     hes_afk_demoted = "%s has been demoted for being AFK for too long.",
-    afk_cmd_to_exit = "Type /afk again to exit AFK mode.",
+    afk_cmd_to_exit = "Type /afk to exit AFK mode.",
     player_now_afk = "%s is now AFK.",
     player_no_longer_afk = "%s is no longer AFK.",
 
@@ -470,10 +483,14 @@ local my_language = {
     buy_x = "Buy %s",
 
     -- F4menu
+    ammo = "ammo",
+    weapon_ = "weapon",
     no_extra_weapons = "This job has no extra weapons.",
     become_job = "Become job",
     create_vote_for_job = "Create vote",
-    shipments = "Shipments",
+    shipment = "shipment",
+    Shipments = "Shipments",
+    shipments = "shipments",
     F4guns = "Weapons",
     F4entities = "Miscellaneous",
     F4ammo = "Ammo",
@@ -488,7 +505,6 @@ local my_language = {
     buy_health = "Buy health(%s)",
     request_gunlicense = "Request gunlicense",
     demote_player_menu = "Demote a player",
-
 
     searchwarrantbutton = "Make a player wanted",
     unwarrantbutton = "Remove the wanted status from a player",

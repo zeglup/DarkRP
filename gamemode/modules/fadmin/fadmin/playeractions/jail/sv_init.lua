@@ -13,16 +13,17 @@ local function Jail(ply, cmd, args)
     local time = ""
 
     for _, target in pairs(targets) do
-        if not FAdmin.Access.PlayerHasPrivilege(ply, "Jail", target) then FAdmin.Messages.SendMessage(ply, 5, "No access!") return false end
         if not IsValid(target) then continue end
-        local jailDistance = 50
+        if not FAdmin.Access.PlayerHasPrivilege(ply, "Jail", target) then FAdmin.Messages.SendMessage(ply, 5, "No access!") return false end
 
+        local jailDistance
+        
         ply:ExitVehicle()
 
         local JailProps = {}
         if JailType == "unjail" or string.lower(cmd) == "unjail" then
             if target.FAdminJailProps then
-                for k,v in pairs(target.FAdminJailProps) do
+                for k in pairs(target.FAdminJailProps) do
                     if not IsValid(k) then continue end
                     k:SetCanRemove(true)
                     k:Remove()
@@ -33,8 +34,8 @@ local function Jail(ply, cmd, args)
             timer.Remove("FAdmin_jail" .. target:UserID())
             timer.Remove("FAdmin_jail_watch" .. target:UserID())
             target:FAdmin_SetGlobal("fadmin_jailed", false)
-
         elseif JailType == "small" then
+            jailDistance = 50
             table.insert(JailProps, {pos = Vector(0,0,58), ang = Angle(0,0,0), model = "models/props_wasteland/laundry_dryer001.mdl"})
         elseif JailType == "normal" then
             jailDistance = 70
@@ -71,7 +72,7 @@ local function Jail(ply, cmd, args)
             target.FAdminJailPos = target:GetPos()
             target.FAdminJailProps = {}
 
-            for k,v in pairs(JailProps) do
+            for _, v in pairs(JailProps) do
                 local JailProp = ents.Create("fadmin_jail")
                 JailProp:SetPos(target.FAdminJailPos + v.pos)
                 JailProp:SetAngles(v.ang)
@@ -91,7 +92,7 @@ local function Jail(ply, cmd, args)
                     timer.Remove("FAdmin_jail_watch" .. target:UserID())
                     target:FAdmin_SetGlobal("fadmin_jailed", false)
 
-                    for k, v in pairs(target.FAdminJailProps) do
+                    for k in pairs(target.FAdminJailProps) do
                         if not IsValid(k) then continue end
                         k:SetCanRemove(true)
                         k:Remove()
@@ -139,12 +140,6 @@ end
 hook.Add("PlayerSpawn", "FAdmin_jail", function(ply)
     if ply:FAdmin_GetGlobal("fadmin_jailed") then
         timer.Simple(0.1, function() if IsValid(ply) then ply:SetPos(ply.FAdminJailPos) end end)
-    end
-end)
-
-hook.Add("PlayerNoClip", "FAdmin_jail", function(ply)
-    if ply:FAdmin_GetGlobal("fadmin_jailed") then
-        return false
     end
 end)
 

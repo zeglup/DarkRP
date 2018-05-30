@@ -95,7 +95,7 @@ local function DrawHealth()
     draw.DrawNonParsedText(math.Max(0, math.Round(myHealth)), "DarkRPHUD2", RelativeX + 4 + (HUDWidth - 8) / 2, RelativeY - 32, ConVars.HealthText, 1)
 
     -- Armor
-    local armor = localplayer:Armor()
+    local armor = math.Clamp(localplayer:Armor(), 0, 100)
     if armor ~= 0 then
         draw.RoundedBox(2, RelativeX + 4, RelativeY - 15, (HUDWidth - 8) * armor / 100, 5, colors.blue)
     end
@@ -331,8 +331,8 @@ local function DrawEntityDisplay()
     local shootPos = localplayer:GetShootPos()
     local aimVec = localplayer:GetAimVector()
 
-    for k, ply in pairs(players or player.GetAll()) do
-        if ply == localplayer or not ply:Alive() or ply:GetNoDraw() then continue end
+    for _, ply in pairs(players or player.GetAll()) do
+        if not IsValid(ply) or ply == localplayer or not ply:Alive() or ply:GetNoDraw() or ply:IsDormant() then continue end
         local hisPos = ply:GetShootPos()
         if ply:getDarkRPVar("wanted") then ply:drawWantedInfo() end
 

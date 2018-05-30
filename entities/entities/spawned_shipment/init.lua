@@ -85,6 +85,12 @@ function ENT:Use(activator, caller)
 
     if self.locked or self.USED then return end
 
+    local canUse, reason = hook.Call("canDarkRPUse", nil, activator, self, caller)
+    if canUse == false then
+      if reason then DarkRP.notify(activator, 1, 4, reason) end
+      return
+    end
+
     self.locked = true -- One activation per second
     self.USED = true
     self.sparking = true
@@ -169,6 +175,8 @@ function ENT:Destruct()
     weapon:SetWeaponClass(class)
     weapon:SetPos(Vector(vPoint.x, vPoint.y, vPoint.z + 5))
     weapon.ammoadd = self.ammoadd or (weapons.Get(class) and weapons.Get(class).Primary.DefaultClip)
+    weapon.clip1 = self.clip1
+    weapon.clip2 = self.clip2
     weapon.nodupe = true
     weapon:Spawn()
     weapon.dt.amount = count

@@ -127,7 +127,7 @@ end
 
 function SWEP:GetStrippableWeapons(ent, callback)
     CAMI.PlayerHasAccess(ent, "DarkRP_GetAdminWeapons", function(access)
-        for k,v in pairs(ent:GetWeapons()) do
+        for _, v in ipairs(ent:GetWeapons()) do
             if not v:IsValid() then continue end
             local class = v:GetClass()
 
@@ -152,45 +152,26 @@ function SWEP:PrimaryAttack()
     local trace = self:GetOwner():GetEyeTrace()
     self:GetOwner():LagCompensation(false)
 
-    if not IsValid(trace.Entity) or not trace.Entity:IsPlayer() or trace.Entity:GetPos():DistToSqr(self:GetOwner():GetPos()) > 10000 then
+    local ent = trace.Entity
+    if not IsValid(ent) or not ent:IsPlayer() or ent:GetPos():DistToSqr(self:GetOwner():GetPos()) > 10000 then
         return
     end
 
     self:EmitSound("npc/combine_soldier/gear5.wav", 50, 100)
     self:SetNextSoundTime(CurTime() + 0.3)
 
-
     if not IsFirstTimePredicted() then return end
 
-    local result = {}
     local weps = {}
-    self:GetStrippableWeapons(trace.Entity, function(wep)
+    self:GetStrippableWeapons(ent, function(wep)
         table.insert(weps, wep)
     end)
 
-    hook.Call("playerWeaponsChecked", nil, self:GetOwner(), trace.Entity, weps)
+    hook.Call("playerWeaponsChecked", nil, self:GetOwner(), ent, weps)
 
-    if SERVER then return end
-    for _, wep in pairs(weps) do
-        table.insert(result, wep:GetPrintName() and language.GetPhrase(wep:GetPrintName()) or wep:GetClass())
-    end
+    if not CLIENT then return end
 
-    result = table.concat(result, ", ")
-
-    if result == "" then
-        self:GetOwner():ChatPrint(DarkRP.getPhrase("no_illegal_weapons", trace.Entity:Nick()))
-        return
-    end
-
-    self:GetOwner():ChatPrint(DarkRP.getPhrase("persons_weapons", trace.Entity:Nick()))
-    if string.len(result) >= 126 then
-        local amount = math.ceil(string.len(result) / 126)
-        for i = 1, amount, 1 do
-            self:GetOwner():ChatPrint(string.sub(result, (i-1) * 126, i * 126 - 1))
-        end
-    else
-        self:GetOwner():ChatPrint(result)
-    end
+    self:PrintWeapons(ent, DarkRP.getPhrase("persons_weapons", ent:Nick()))
 end
 
 function SWEP:SecondaryAttack()
@@ -201,7 +182,8 @@ function SWEP:SecondaryAttack()
     local trace = self:GetOwner():GetEyeTrace()
     self:GetOwner():LagCompensation(false)
 
-    if not IsValid(trace.Entity) or not trace.Entity:IsPlayer() or trace.Entity:GetPos():DistToSqr(self:GetOwner():GetPos()) > 10000 then
+    local ent = trace.Entity
+    if not IsValid(ent) or not ent:IsPlayer() or ent:GetPos():DistToSqr(self:GetOwner():GetPos()) > 10000 then
         return
     end
 
@@ -224,28 +206,29 @@ function SWEP:Reload()
 
     local trace = self:GetOwner():GetEyeTrace()
 
-    if not IsValid(trace.Entity) or not trace.Entity:IsPlayer() or trace.Entity:GetPos():DistToSqr(self:GetOwner():GetPos()) > 10000 then
+    local ent = trace.Entity
+    if not IsValid(ent) or not ent:IsPlayer() or ent:GetPos():DistToSqr(self:GetOwner():GetPos()) > 10000 then
         return
     end
 
-    if not trace.Entity.ConfiscatedWeapons then
-        DarkRP.notify(self:GetOwner(), 1, 4, DarkRP.getPhrase("no_weapons_confiscated", trace.Entity:Nick()))
+    if not ent.ConfiscatedWeapons then
+        DarkRP.notify(self:GetOwner(), 1, 4, DarkRP.getPhrase("no_weapons_confiscated", ent:Nick()))
         return
     else
-        for k,v in pairs(trace.Entity.ConfiscatedWeapons) do
-            local wep = trace.Entity:Give(v.class)
-            trace.Entity:RemoveAllAmmo()
-            trace.Entity:SetAmmo(v.primaryAmmoCount, v.primaryAmmoType, false)
-            trace.Entity:SetAmmo(v.secondaryAmmoCount, v.secondaryAmmoType, false)
+        for _, v in pairs(ent.ConfiscatedWeapons) do
+            local wep = ent:Give(v.class)
+            ent:RemoveAllAmmo()
+            ent:SetAmmo(v.primaryAmmoCount, v.primaryAmmoType, false)
+            ent:SetAmmo(v.secondaryAmmoCount, v.secondaryAmmoType, false)
 
             wep:SetClip1(v.clip1)
             wep:SetClip2(v.clip2)
 
         end
-        DarkRP.notify(self:GetOwner(), 2, 4, DarkRP.getPhrase("returned_persons_weapons", trace.Entity:Nick()))
+        DarkRP.notify(self:GetOwner(), 2, 4, DarkRP.getPhrase("returned_persons_weapons", ent:Nick()))
 
-        hook.Call("playerWeaponsReturned", nil, self:GetOwner(), trace.Entity, trace.Entity.ConfiscatedWeapons)
-        trace.Entity.ConfiscatedWeapons = nil
+        hook.Call("playerWeaponsReturned", nil, self:GetOwner(), ent, ent.ConfiscatedWeapons)
+        ent.ConfiscatedWeapons = nil
     end
 end
 
@@ -259,55 +242,79 @@ function SWEP:Succeed()
     if not IsValid(self:GetOwner()) then return end
     self:SetIsWeaponChecking(false)
 
-    if CLIENT then return end
-    local result = {}
-    local stripped = {}
     local trace = self:GetOwner():GetEyeTrace()
-    if not IsValid(trace.Entity) or not trace.Entity:IsPlayer() then return end
-    self:GetStrippableWeapons(trace.Entity, function(wep)
-        trace.Entity:StripWeapon(wep:GetClass())
-        table.insert(result, wep:GetClass())
+    local ent = trace.Entity
+    if not IsValid(ent) or not ent:IsPlayer() then return end
+
+    if CLIENT then
+        if not IsFirstTimePredicted() then return end
+        self:PrintWeapons(ent, DarkRP.getPhrase("confiscated_these_weapons"))
+        return
+    end
+
+    local stripped = {}
+
+    self:GetStrippableWeapons(ent, function(wep)
+        ent:StripWeapon(wep:GetClass())
         stripped[wep:GetClass()] = {
             class = wep:GetClass(),
-            primaryAmmoCount = trace.Entity:GetAmmoCount(wep:GetPrimaryAmmoType()),
+            primaryAmmoCount = ent:GetAmmoCount(wep:GetPrimaryAmmoType()),
             primaryAmmoType = wep:GetPrimaryAmmoType(),
-            secondaryAmmoCount = trace.Entity:GetAmmoCount(wep:GetSecondaryAmmoType()),
+            secondaryAmmoCount = ent:GetAmmoCount(wep:GetSecondaryAmmoType()),
             secondaryAmmoType = wep:GetSecondaryAmmoType(),
             clip1 = wep:Clip1(),
             clip2 = wep:Clip2()
         }
     end)
-    result = table.concat(result, ", ")
 
-    if not trace.Entity.ConfiscatedWeapons then
-        if next(stripped) ~= nil then trace.Entity.ConfiscatedWeapons = stripped end
+    if not ent.ConfiscatedWeapons then
+        if next(stripped) ~= nil then ent.ConfiscatedWeapons = stripped end
     else
         -- Merge stripped weapons into confiscated weapons
         for k,v in pairs(stripped) do
-            if trace.Entity.ConfiscatedWeapons[k] then continue end
+            if ent.ConfiscatedWeapons[k] then continue end
 
-            trace.Entity.ConfiscatedWeapons[k] = v
+            ent.ConfiscatedWeapons[k] = v
         end
     end
 
-    hook.Call("playerWeaponsConfiscated", nil, self:GetOwner(), trace.Entity, trace.Entity.ConfiscatedWeapons)
+    hook.Call("playerWeaponsConfiscated", nil, self:GetOwner(), ent, ent.ConfiscatedWeapons)
 
-    if result == "" then
-        self:GetOwner():ChatPrint(DarkRP.getPhrase("no_illegal_weapons", trace.Entity:Nick()))
+    if next(stripped) ~= nil then
         self:EmitSound("npc/combine_soldier/gear5.wav", 50, 100)
         self:SetNextSoundTime(CurTime() + 0.3)
     else
         self:EmitSound("ambient/energy/zap1.wav", 50, 100)
-        self:GetOwner():ChatPrint(DarkRP.getPhrase("confiscated_these_weapons"))
-        if string.len(result) >= 126 then
-            local amount = math.ceil(string.len(result) / 126)
-            for i = 1, amount, 1 do
-                self:GetOwner():ChatPrint(string.sub(result, (i-1) * 126, i * 126 - 1))
-            end
-        else
-            self:GetOwner():ChatPrint(result)
-        end
         self:SetNextSoundTime(0)
+    end
+end
+
+function SWEP:PrintWeapons(ent, weaponsFoundPhrase)
+    local result = {}
+    local weps = {}
+    self:GetStrippableWeapons(ent, function(wep)
+        table.insert(weps, wep)
+    end)
+
+    for _, wep in ipairs(weps) do
+        table.insert(result, wep:GetPrintName() and language.GetPhrase(wep:GetPrintName()) or wep:GetClass())
+    end
+
+    result = table.concat(result, ", ")
+
+    if result == "" then
+        self:GetOwner():ChatPrint(DarkRP.getPhrase("no_illegal_weapons", ent:Nick()))
+        return
+    end
+
+    self:GetOwner():ChatPrint(weaponsFoundPhrase)
+    if string.len(result) >= 126 then
+        local amount = math.ceil(string.len(result) / 126)
+        for i = 1, amount, 1 do
+            self:GetOwner():ChatPrint(string.sub(result, (i-1) * 126, i * 126 - 1))
+        end
+    else
+        self:GetOwner():ChatPrint(result)
     end
 end
 

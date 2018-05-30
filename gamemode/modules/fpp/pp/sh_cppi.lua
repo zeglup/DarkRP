@@ -23,7 +23,7 @@ function PLAYER:CPPIGetFriends()
 	if not self.Buddies then return CPPI.CPPI_DEFER end
 	local FriendsTable = {}
 
-	for k,v in pairs(self.Buddies) do
+	for k, v in pairs(self.Buddies) do
 		if not table.HasValue(v, true) then continue end -- not buddies in anything
 		table.insert(FriendsTable, k)
 	end
@@ -40,6 +40,8 @@ end
 
 if SERVER then
 	function ENTITY:CPPISetOwner(ply)
+		if ply == self.FPPOwner then return end
+
 		local valid = IsValid(ply) and ply:IsPlayer()
 		local steamId = valid and ply:SteamID() or nil
 		local canSetOwner = hook.Run("CPPIAssignOwnership", ply, self, valid and ply:UniqueID() or ply)

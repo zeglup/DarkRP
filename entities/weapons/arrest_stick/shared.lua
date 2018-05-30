@@ -62,26 +62,22 @@ function SWEP:PrimaryAttack()
     local trace = util.QuickTrace(self:GetOwner():EyePos(), self:GetOwner():GetAimVector() * 90, {self:GetOwner()})
     self:GetOwner():LagCompensation(false)
 
-    if IsValid(trace.Entity) and trace.Entity.onArrestStickUsed then
-        trace.Entity:onArrestStickUsed(self:GetOwner())
+    local ent = trace.Entity
+    if IsValid(ent) and ent.onArrestStickUsed then
+        ent:onArrestStickUsed(self:GetOwner())
         return
     end
 
-    local ent = self:GetOwner():getEyeSightHitEntity(nil, nil, function(p) return p ~= self:GetOwner() and p:IsPlayer() and p:Alive() end)
+    ent = self:GetOwner():getEyeSightHitEntity(nil, nil, function(p) return p ~= self:GetOwner() and p:IsPlayer() and p:Alive() and p:IsSolid() end)
 
-    if not IsValid(ent) or (self:GetOwner():EyePos():DistToSqr(ent:GetPos()) > 8100) or not ent:IsPlayer() then
+    local stickRange = self.stickRange * self.stickRange
+    if not IsValid(ent) or (self:GetOwner():EyePos():DistToSqr(ent:GetPos()) > stickRange) or not ent:IsPlayer() then
         return
     end
 
     local canArrest, message = hook.Call("canArrest", DarkRP.hooks, self:GetOwner(), ent)
     if not canArrest then
         if message then DarkRP.notify(self:GetOwner(), 1, 5, message) end
-        return
-    end
-
-    -- Send NPCs to Jail
-    if ent:IsNPC() then
-        ent:SetPos(DarkRP.retrieveJailPos())
         return
     end
 

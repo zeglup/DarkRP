@@ -27,8 +27,9 @@ function meta:getPocketItems()
 end
 
 function DarkRP.openPocketMenu()
-    if frame and frame:IsValid() and frame:IsVisible() then return end
-    if LocalPlayer():GetActiveWeapon():GetClass() ~= "pocket" then return end
+    if IsValid(frame) and frame:IsVisible() then return end
+    local wep = LocalPlayer():GetActiveWeapon()
+    if not wep:IsValid() or wep:GetClass() ~= "pocket" then return end
     if not pocket then pocket = {} return end
     if table.Count(pocket) == 0 then return end
     frame = vgui.Create("DFrame")
@@ -59,7 +60,7 @@ function reload()
     local i = 0
 
     local items = {}
-    for k,v in pairs(pocket) do
+    for k, v in pairs(pocket) do
 
         local icon = vgui.Create("SpawnIcon", frame)
         icon:SetPos(i * 64, 25)
@@ -84,8 +85,14 @@ function reload()
             fn.Map(self.Remove, items)
             items = {}
 
-            LocalPlayer():GetActiveWeapon():SetHoldType("pistol")
-            timer.Simple(0.2, function() if LocalPlayer():GetActiveWeapon():IsValid() then LocalPlayer():GetActiveWeapon():SetHoldType("normal") end end)
+            local wep = LocalPlayer():GetActiveWeapon()
+
+            wep:SetHoldType("pistol")
+            timer.Simple(0.2, function()
+                if wep:IsValid() then
+                    wep:SetHoldType("normal")
+                end
+            end)
         end
 
         table.insert(items, icon)
